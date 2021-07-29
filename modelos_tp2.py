@@ -405,6 +405,10 @@ earthquakes_test=test_values
 df_bits_test=earthquakes_test.loc[:,['geo_level_1_id']].join(pd.DataFrame.from_dict(binarios_geo1),on='geo_level_1_id',lsuffix='bin')
 earthquakes_ampliado_test=earthquakes_test.join(df_bits_test.loc[:,['geolevel1_bit1','geolevel1_bit2','geolevel1_bit3','geolevel1_bit4','geolevel1_bit5']])
 earthquakes_ampliado_test['ratio_edificio']=earthquakes_ampliado_test['height_percentage']/earthquakes_ampliado_test['area_percentage']
+earthquakes_ampliado_test['volumen_edificio']=earthquakes_ampliado_test['height_percentage']*earthquakes_ampliado_test['area_percentage']
+earthquakes_ampliado_test['volumen_piso']=(earthquakes_ampliado_test['height_percentage']*earthquakes_ampliado_test['area_percentage'])/earthquakes_ampliado_test['count_floors_pre_eq']
+earthquakes_ampliado_test['indice_edificio']=earthquakes_ampliado_test['age']/(earthquakes_ampliado_test['height_percentage']*earthquakes_ampliado_test['area_percentage'])/earthquakes_ampliado_test['count_floors_pre_eq']
+earthquakes_ampliado_test['indice_edificio']=(earthquakes_ampliado_test['age']/(earthquakes_ampliado_test['height_percentage']*earthquakes_ampliado_test['area_percentage'])/earthquakes_ampliado_test['count_floors_pre_eq'])*10
 earthquakes_ampliado_test=earthquakes_ampliado_test.join(earthquakes_ampliado_test.loc[:,['geo_level_1_id','count_floors_pre_eq']].groupby('geo_level_1_id').mean(),on='geo_level_1_id',rsuffix='_geo1mean')
 earthquakes_ampliado_test=earthquakes_ampliado_test.join(earthquakes_ampliado_test.loc[:,['geo_level_2_id','age']].groupby('geo_level_2_id').mean(),on='geo_level_2_id',rsuffix='_geo2mean')
 earthquakes_ampliado_test=earthquakes_ampliado_test.join(earthquakes_ampliado_test.loc[:,['geo_level_2_id','area_percentage']].groupby('geo_level_2_id').mean(),on='geo_level_2_id',rsuffix='_geo2mean')
@@ -841,21 +845,8 @@ earthquakes_ampliado_test
 
 -RATIO EDIFICIO GEOLEVEL3 utilizando la razon entre el mean_area y mean_altura para cada geolevel3 distinto
 
-# Descarga de archivos
+# Definimos Features y Split para el Subset de Entrenamiento y Submission
 """
-
-# download train y test para local
-earthquakes_ampliado.to_csv('earthquakes_ampliado.csv')
-earthquakes_labels.to_csv('earthquakes_labels.csv')
-earthquakes_ampliado_test.to_csv('earthquakes_ampliado_test.csv')
-
-files.download('earthquakes_ampliado.csv')
-
-files.download('earthquakes_ampliado_test.csv')
-
-files.download('earthquakes_labels.csv')
-
-"""# Definimos Features y Split para el Subset de Entrenamiento y Submission"""
 
 # Primero seleccionamos algunos features para probar el modelo de Clasificación por RandomForest del tutorial
 
@@ -1316,6 +1307,8 @@ algunas_features_select_keras = [
 
 earthquakes_ampliado_keras=earthquakes_subset_keras[algunas_features_seleccionadas]
 earthquakes_ampliado_keras
+
+#normalizamos el dataset
 
 norm_earthquakes_ampliado_keras=(earthquakes_ampliado_keras-earthquakes_ampliado_keras.mean())/earthquakes_ampliado_keras.std()
 norm_earthquakes_ampliado_keras
